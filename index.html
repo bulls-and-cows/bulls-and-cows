@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Bull & Cows</title>
+    <style>
+        body, input {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 32pt;
+        }
+        input {
+            width: 100%;
+            box-sizing: border-box;
+            display: inline-block;
+        }
+        input[type=text] {
+            letter-spacing: 0.5em;
+            padding: 1px 0;
+        }
+        #form_number, #form_submit, #button_show {
+            width: 50%;
+            margin: 0;
+        }
+        #number {
+            font-weight: bold;
+            display: inline-block;
+            width: 50%;
+        }
+        #number, #history {
+            letter-spacing: 0.5em;
+            margin-bottom: 0.5em;
+        }
+        #container {
+            width: 10em;
+            margin: 3em auto;
+        }
+        #sub-container {
+            margin-left: 0em;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <div id="sub-container">
+            <div><span id="number">****</span><input id="button_show" type="button" value="Show" onclick="showNumber()" /></div>
+            <div id="history"></div>
+            <div id="form">
+                <form onsubmit="return onSubmit(event)" autocomplete="off">
+                    <input id="form_number" type="text" maxlength="4" autocomplete="false" /><input id="form_submit" type="submit" value="Check" />
+                    <input id="button_hint" type="button" value="Hint" onclick="hint()" />
+                    <input id="form_new_game" type="button" value="New Game" onclick="newGame()" />
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+
+<!-- Scripts -->
+<script>
+    (function () {
+
+        var validNumbers = [];
+
+        for (var a=1; a<10; a++) {
+            for (var b=1; b<10; b++) {
+                if (b === a) continue;
+                for (var c=1; c<10; c++) {
+                    if (c === a) continue;
+                    if (c === b) continue;
+                    for (var d=1; d<10; d++) {
+                        if (d === a) continue;
+                        if (d === b) continue;
+                        if (d === c) continue;
+                        validNumbers.push(''+a+b+c+d);
+                    }
+                }
+            }
+        }
+
+        window.checkNumber = function (text, origin) {
+            if (!validNumbers.includes(text)) return {'ok': false, 'error': 'Number should have 4 unique digits'};
+            var bulls = 0;
+            var cows = 0;
+            for (var i=0; i<origin.length; i++) {
+                for (var j=0; j<text.length; j++) {
+                    var a = origin[i];
+                    var b = text[j];
+                    if (a === b) {
+                        if (i === j) {
+                            bulls++;
+                        } else {
+                            cows++;
+                        }
+                    }
+                }
+            }
+            return {
+                'ok': true,
+                'number': text,
+                'bulls': bulls,
+                'cows': cows,
+                'win': bulls === origin.length
+            }
+        };
+
+        window.randomNumber = function () { 
+            return validNumbers[Math.floor(Math.random() * validNumbers.length)]; 
+        };
+
+        window.validNumbers = validNumbers;
+
+        })()
+</script>
+<script>
+    var NUMBER = null;
+    var session_history = [];
+
+    function newGame() {
+        NUMBER = randomNumber();
+        session_history = [];
+        setTitle();
+        document.getElementById('history').innerHTML = '';
+        document.getElementById('form_number').value = '';
+        document.getElementById('form_number').style = 'display: inline-block';
+        document.getElementById('form_submit').style = 'display: inline-block';
+        document.getElementById('form_new_game').style = 'display: inline-block';
+        document.getElementById('button_show').style = 'display: inline-block';
+        document.getElementById('button_hint').style = 'display: inline-block';
+        document.getElementById('form_number').focus();
+        hint();
+    }
+
+    function setTitle(number) {
+        number = number || '****';
+        document.getElementById('number').innerHTML = number;
+    }
+
+    function hint() {
+        for (var c=0; c<validNumbers.length; c++) {
+            var x = validNumbers[c];
+            document.getElementById('form_number').value = x;
+            var valid = true;
+            for (var i=0; i<session_history.length; i++) {
+                if (session_history[i].number === x && session_history[i].bulls < 4) {
+                    valid = false;
+                    break;
+                }
+                var result = checkNumber(session_history[i].number, x);
+                if (JSON.stringify(result) != JSON.stringify(session_history[i])) {
+                    valid = false;
+                    break;
+                }
+            }
+            if (valid) break;
+        }
+    }
+
+    function showNumber() {
+        setTitle(NUMBER);
+        document.getElementById('form_number').style = 'display: none';
+        document.getElementById('form_submit').style = 'display: none';
+        document.getElementById('button_show').style = 'display: none';
+        document.getElementById('button_hint').style = 'display: none';
+    }
+
+    function onSubmit(e) {
+        var number = document.getElementById('form_number').value;
+
+        e.preventDefault();
+        var result = checkNumber(number, NUMBER);
+
+        session_history.push(result);
+
+        if (result.ok) {
+            if (result.win) {
+                document.getElementById('form_number').style = 'display: none';
+                document.getElementById('form_submit').style = 'display: none';
+                document.getElementById('button_show').style = 'display: none';
+                document.getElementById('button_hint').style = 'display: none';
+                setTitle(NUMBER);
+            }
+            document.getElementById('history').innerHTML += '<div>' + number + ' ' + 'B'.repeat(result.bulls) + 'c'.repeat(result.cows) + '</div>'
+        } else {
+            alert(result.error);
+        }
+
+        document.getElementById('form_number').value = '';
+        document.getElementById('form_number').focus();
+        return false;
+    }
+</script>
+<script>newGame();</script>
+
+</html>
