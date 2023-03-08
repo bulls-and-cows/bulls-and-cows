@@ -56,6 +56,14 @@
     </div>
 </body>
 
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-R5GY57D036"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-R5GY57D036');
+</script>
 <!-- Scripts -->
 <script>
     (function () {
@@ -129,6 +137,7 @@
         document.getElementById('button_hint').style = 'display: inline-block';
         document.getElementById('form_number').focus();
         hint();
+        gtag('event','new_game');
     }
 
     function setTitle(number) {
@@ -154,6 +163,7 @@
             }
             if (valid) break;
         }
+        gtag('event','hint');
     }
 
     function showNumber() {
@@ -162,6 +172,7 @@
         document.getElementById('form_submit').style = 'display: none';
         document.getElementById('button_show').style = 'display: none';
         document.getElementById('button_hint').style = 'display: none';
+        gtag('event','show_number');
     }
 
     function onSubmit(e) {
@@ -188,16 +199,9 @@
         document.getElementById('form_number').value = '';
         document.getElementById('form_number').focus();
         return false;
+        gtag('event','check_number');
     }
 </script>
 <script>newGame();</script>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-R5GY57D036"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
 
-  gtag('config', 'G-R5GY57D036');
-</script>
 </html>
