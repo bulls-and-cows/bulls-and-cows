@@ -251,7 +251,7 @@ View.prototype.onShow = function () {
     this.in_game = false;
     this.update_view();
     
-    gtag('event', 'show_number');
+    gtag('event', 'show_number', { 'steps': this.history.length });
     gtag('event', 'game_finished');
 };
 
