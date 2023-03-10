@@ -17,7 +17,7 @@
             text-decoration: none;
             display: inline-block;
             box-sizing: border-box;
-            padding: 0 1em;
+            padding: 0;
         }
         input {
             display: inline-block;
@@ -36,29 +36,38 @@
             /* outline; */
         }
         table {
+            width: 100%;
             margin: 1em auto;
             font-size: xx-large;
         }
         del {
             opacity: 50%;
         }
-        .cell {
-            width: 5em;
-        }
+        /* .cell { */
+            /* width: 5em; */
+        /* } */
         .left {
             text-align: left;
+            padding-left: 0.5em;
         }
         .right {
             text-align: right;
+            padding-right: 0.5em;
         }
         .center {
             text-align: center;
         }
+        .placeholder td {
+            height: 0;
+            line-height: 0;
+        }
         #history {
-            padding: 0.5em 0;
+            padding-top: 0.5em;
+            padding-bottom: 0.5em;
         }
         #history_result {
-            padding: 0.5em 0 0.5em 1em;
+            padding-top: 0.5em;
+            padding-bottom: 0.5em;
         }
         #number {
             font-weight: bold;
@@ -76,10 +85,15 @@
         <h1>bulls & cows</h1>
     </div>
     <table>
+        <tr class="placeholder">
+            <td class="right">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td class="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        </tr>
         <tr>
-            <td class="right cell"><a id="button_new" class="button" href="#new" onclick="return false;" title="guess a new number">new</a></td>
-            <td id="number" class="center"></td>
-            <td class="left cell"><a id="button_show" class="button" href="#show" onclick="return false;" title="stop game and show the number">show</a></td>
+            <td width="50%" class="right cell"><a id="button_new" class="button" href="#new" onclick="return false;" title="guess a new number">new</a></td>
+            <td width="0%" id="number" class="center"></td>
+            <td width="50%" class="left cell"><a id="button_show" class="button" href="#show" onclick="return false;" title="stop game and show the number">show</a></td>
         </tr>
         <tr>
             <td class="right"></td>
@@ -285,10 +299,14 @@ View.prototype.result2HTML = function (result, side) {
     if (side === 'number') {
         return '<div>' + formatted_number + '</div>';
     } else {
-        if (this.in_game) {
-            return '<div>' + 'b'.repeat(result.bulls) + 'c'.repeat(result.cows) + '</div>';
+        if (result.bulls + result.cows > 0) {
+            if (this.in_game) {
+                return '<div>' + 'b'.repeat(result.bulls) + 'c'.repeat(result.cows) + '</div>';
+            } else {
+                return '<div>' + '<b>b</b>'.repeat(result.bulls) + 'c'.repeat(result.cows) + '</div>';
+            }
         } else {
-            return '<div>' + '<b>b</b>'.repeat(result.bulls) + 'c'.repeat(result.cows) + '</div>';
+            return '<div>&nbsp;</div>'
         }
     }
 };
