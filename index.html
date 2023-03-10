@@ -3,57 +3,105 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="description" content="Free online implementation of Bulls and Cows game">
+    <meta name="keywords" content="Bulls and cows, free, online, game">
+    <meta name="author" content="Dmitrii Pankov (c) 2023">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bull & Cows</title>
     <style>
         body, input {
             font-family: 'Courier New', Courier, monospace;
-            font-size: 32pt;
+        }
+        a.button {
+            text-decoration: none;
+            display: inline-block;
+            box-sizing: border-box;
+            padding: 0 1em;
         }
         input {
-            width: 100%;
-            box-sizing: border-box;
             display: inline-block;
+            text-align: center;
+            border: 0;
+            /* outline: 0; */
+            border-bottom: 1px solid;
+            padding: 0;
+            margin: 0;
+            font-size: inherit;
         }
-        input[type=tel] {
-            letter-spacing: 0.5em;
-            padding: 1px 0;
+        input:focus {
+            border: 0;
+            outline: 0;
+            border-bottom: 1px solid;
+            /* outline; */
+        }
+        table {
+            margin: 1em auto;
+            font-size: xx-large;
         }
         del {
             opacity: 50%;
         }
-        #text_number, #button_check, #button_show {
-            width: 50%;
-            margin: 0;
+        .cell {
+            width: 5em;
+        }
+        .left {
+            text-align: left;
+        }
+        .right {
+            text-align: right;
+        }
+        .center {
+            text-align: center;
+        }
+        #history {
+            padding: 0.5em 0;
+        }
+        #history_result {
+            padding: 0.5em 1em;
         }
         #number {
             font-weight: bold;
-            display: inline-block;
-            width: 50%;
         }
-        #number, #history {
-            letter-spacing: 0.5em;
-            margin-bottom: 0.5em;
-        }
-        #container {
-            width: 10em;
-            margin: 3em auto;
+        #message {
+            font-size: small;
+            color: red;
+            padding: 1em;
         }
     </style>
 </head>
 
 <body>
-    <div id="container">
-        <div><span id="number">****</span><input id="button_show" type="button" value="Show" /></div>
-        <div id="history"></div>
-        <div>
-            <form id="form" autocomplete="off">
-                <input id="text_number" type="tel" maxlength="4" autocomplete="false" /><input id="button_check" type="submit" value="Check" />
-                <input id="button_hint" type="button" value="Hint" />
-                <input id="button_new" type="button" value="New Game" />
-            </form>
-        </div>
+    <div class="center">
+        <h1>bulls & cows</h1>
+    </div>
+    <table>
+        <tr>
+            <td class="right cell"><a id="button_new" class="button" href="#new" onclick="return false;" title="guess a new number">new</a></td>
+            <td id="number" class="center cell"></td>
+            <td class="left cell"><a id="button_show" class="button" href="#show" onclick="return false;" title="stop game and show the number">show</a></td>
+        </tr>
+        <tr>
+            <td class="right"></td>
+            <td id="history" class="center"></td>
+            <td id="history_result" class="left" title="b - bulls, c - cows"></td>
+        </tr>
+        <tr>
+            <td class="right"><a id="button_hint" class="button" href="#hint" onclick="return false;" title="suggest a suitable number">hint</a></td>
+            <td class="center">
+                <form id="form" autocomplete="off">
+                    <input id="text_number" type="tel" maxlength="4" size="4" autocomplete="false" />
+                </form>
+            </td>
+            <td class="left"><a id="button_check" class="button" href="#check" onclick="return false;" title="check your number">check</a></td>
+        </tr>
+        <tr>
+            <td id="message" class="center" colspan="3"></td>
+        </tr>
+    </table>
+    <div class="center">
+        <h2>guess a number</h2>
+        <p>it has 4 unique non-zero digits</p>
     </div>
 </body>
 
@@ -106,9 +154,23 @@ Game.prototype.check = function (number) {
 
 Game.prototype._check = function (number, origin) {
     if (!this.valid_numbers.includes(number)) {
+        for (var i = 0; i < number.length; i++) {
+            if (!this.chars.includes(number[i])) {
+                return {
+                    'ok': false,
+                    'error': 'The number should have only digits from 1 to 9'
+                };
+            }
+        }
+        if (number.length !== this.length) {
+            return {
+                'ok': false,
+                'error': 'The number should have 4 digits'
+            };
+        }
         return {
             'ok': false,
-            'error': 'Number should have 4 unique digits'
+            'error': 'The number shouldn\'t have repeated digits'
         };
     }
     var bulls = 0;
@@ -161,11 +223,13 @@ function gid(id) { return document.getElementById(id); }
 var View = function () {
     this.game = new Game();
     this.history = [];
+    this.hints = 0;
     this.in_game = false;
     var self = this;
-    gid('button_show').onclick = function () { self.onShow(); };
-    gid('button_hint').onclick = function () { self.onHint(); };
-    gid('button_new').onclick = function () { self.onNew(); }
+    gid('button_show').onclick = function () { self.onShow(); return false; };
+    gid('button_hint').onclick = function () { self.onHint(); return false; };
+    gid('button_new').onclick = function () { self.onNew(); return false; }
+    gid('button_check').onclick = function () { self.onCheck(); return false; }
     gid('form').onsubmit = function (e) {
         e.preventDefault();
         self.onCheck();
@@ -178,6 +242,7 @@ var View = function () {
 View.prototype.init = function () {
     this.game.init();
     this.history = [];
+    this.hints = 0;
     this.in_game = true;
     gid('text_number').value = this.game.hint();
 
@@ -191,11 +256,17 @@ View.prototype.update_view = function () {
     gid('button_hint').style = this.in_game ? 'display: inline-block' : 'display: none';
     gid('button_check').style = this.in_game ? 'display: inline-block' : 'display: none';
     gid('text_number').style = this.in_game ? 'display: inline-block' : 'display: none';
-    gid('history').innerHTML = this.history.map(function (x) { return self.result2HTML(x); }).join('');
-    if (this.in_game) { gid('text_number').focus(); }
+    gid('history').innerHTML = this.history.map(function (x) { return self.result2HTML(x, 'number'); }).join('');
+    gid('history_result').innerHTML = this.history.map(function (x) { return self.result2HTML(x, 'result'); }).join('');
+    gid('message').innerHTML = '';
+    if (this.in_game) {
+        gid('text_number').focus();
+    } else {
+        gid('button_new').focus();
+    }
 };
 
-View.prototype.result2HTML = function (result) {
+View.prototype.result2HTML = function (result, side) {
     var number = result.number;
     var origin = this.game.number;
     var formatted_number = number;
@@ -211,7 +282,15 @@ View.prototype.result2HTML = function (result) {
             }
         }
     }
-    return '<div>' + formatted_number + ' ' + 'B'.repeat(result.bulls) + 'c'.repeat(result.cows) + '</div>';
+    if (side === 'number') {
+        return '<div>' + formatted_number + '</div>';
+    } else {
+        if (this.in_game) {
+            return '<div>' + 'b'.repeat(result.bulls) + 'c'.repeat(result.cows) + '</div>';
+        } else {
+            return '<div>' + '<b>b</b>'.repeat(result.bulls) + 'c'.repeat(result.cows) + '</div>';
+        }
+    }
 };
 
 View.prototype.onNew = function () {
@@ -227,16 +306,18 @@ View.prototype.onCheck = function () {
     if (result.ok) {
         gid('text_number').value = '';
         this.history.push(result);
-        gid('history').innerHTML += this.result2HTML(result);
+        gid('history').innerHTML += this.result2HTML(result, 'number');
+        gid('history_result').innerHTML += this.result2HTML(result, 'result');
         if (result.win) {
             this.in_game = false;
             this.update_view();
 
-            gtag('event', 'win', { 'steps': this.history.length });
+            gtag('event', 'win', { 'steps': this.history.length, 'hints': this.hints });
             gtag('event', 'game_finished');
         }
+        gid('message').innerHTML = '';
     } else {
-        alert(result.error);
+        gid('message').innerHTML = result.error;
     }
     gid('text_number').focus();
 
@@ -246,6 +327,8 @@ View.prototype.onCheck = function () {
 View.prototype.onHint = function () {
     gid('text_number').value = this.game.hint();
     gid('text_number').focus();
+    gid('message').innerHTML = '';
+    this.hints++;
     
     gtag('event', 'use_hint');
 };
@@ -254,7 +337,7 @@ View.prototype.onShow = function () {
     this.in_game = false;
     this.update_view();
     
-    gtag('event', 'show_number', { 'steps': this.history.length });
+    gtag('event', 'show_number', { 'steps': this.history.length, 'hints': this.hints });
     gtag('event', 'game_finished');
 };
 
