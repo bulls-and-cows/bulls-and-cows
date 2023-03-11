@@ -77,6 +77,10 @@
             color: red;
             padding: 1em;
         }
+        #description {
+            max-width: 20em;
+            margin: 0 auto;
+        }
     </style>
 </head>
 
@@ -113,10 +117,21 @@
             <td id="message" class="center" colspan="3"></td>
         </tr>
     </table>
-    <div class="center">
-        <h2>guess a number</h2>
+    <div id="description">
+        <h2 class="center">guess a number</h2>
         <p>it has 4 unique non-zero digits</p>
-        <p><a href="https://forms.gle/i2PLdVseFsTvLEaRA" target="_blank">feedback</a></p>
+        <p>i'll tell you how close you are with the number of bulls and cows</p>
+        <p>bull (b) - the right digit at the right place</p>
+        <p>cow (c) - the right digit at the wrong place</p>
+        <h2 class="center">example</h2>
+        <p>if my number is <b>5432</b> and your number is <b>1234</b></p>
+        <p>then i'll tell you <b>bcc</b> because you have one bull (it's <b>3</b>) and two cows (it's <b>2</b> and <b>4</b>)</p>
+        <h2 class="center">buttons</h2>
+        <p>new - guess a new number</p>
+        <p>show - show the number</p>
+        <p>hint - suggest a suitable number</p>
+        <p>check - check your number</p>
+        <p class="center"><a href="https://forms.gle/i2PLdVseFsTvLEaRA" target="_blank">feedback</a></p>
     </div>
 </body>
 
